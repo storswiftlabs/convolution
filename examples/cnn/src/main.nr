@@ -1,20 +1,3 @@
-# Convolution
-
-This is a simple implementation of a convolutional neural network (CNN) library in Noir. The library provides basic building blocks for creating and working with CNN layers, including Convolutional layers, Pooling layers, and Linear (fully connected) layers.
-
-## Features
-
-- Convolutional Layer: The library includes a `Conv2D` struct for creating convolutional layers. You can specify the weight, bias, stride, and padding parameters when creating a convolutional layer. The layer supports both forward and padding operations.
-
-- Pooling Layer: The library includes a `Pool2D` struct for creating pooling layers. You can specify the pooling type (max or average), stride, padding, and kernel size when creating a pooling layer. The layer supports both max pooling and average pooling operations.
-
-- Linear (Fully Connected) Layer: The library includes a `Linear` struct for creating linear layers. You can specify the weight and bias when creating a linear layer. The layer supports forward operations.
-
-## Usage
-
-Here's a basic example of how to use the library to create a simple CNN:
-
-```rust
 use dep::convolution::{conv::{Conv2D, Pool2D, Linear}, tensor::Tensor};
 
 global in_len = 784;
@@ -73,19 +56,3 @@ fn test_main() {
     let b3 = [0; b3_len];
     main(inputs, w1, b1, w2, b2, w3, b3);
 }
-
-```
-
-## Dependencies
-
-This library utilizes [quantized_arithmetic](https://github.com/storswiftlabs/quantized_arithmetic/tree/main) for quantized arithmetic operations and employs [matrix_operations](https://github.com/storswiftlabs/matrix_operations) for matrix operations.
-
-## License
-
-This project  is provided under the [Apache License, Version 2.0](LICENSE).
-
-## Acknowledgments
-
-This library is a simple implementation and may not cover all the features and optimizations required for a production-level CNN library. It serves as a starting point for building more complex neural networks in Noir.
-
-If you have any questions, suggestions, or contributions, please feel free to contact the project maintainers.

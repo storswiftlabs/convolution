@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "convolution",
+    "examples/cnn",
+]
