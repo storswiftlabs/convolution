@@ -53,9 +53,11 @@ fn main(inputs: [Field; in_len], w1 : [Field; w1_len], b1 : [Field; b1_len], w2 
 
     // Perform forward pass
     let input = Tensor::new_quantized(inputs, [1, 28, 28], zero_point, scale);
-    let conv_output1 = conv_layer1.forward(input);
+    let mut conv_output1 = conv_layer1.forward(input);
+    conv_output1.values = conv_output1.relu();
     let pooled_output1 = pooling_layer.max_pooling(conv_output1);
-    let conv_output2 = conv_layer2.forward(pooled_output1);
+    let mut conv_output2 = conv_layer2.forward(pooled_output1);
+    conv_output2.values = conv_output2.relu();
     let pooled_output2 = pooling_layer.max_pooling(conv_output2);
     // Fixed the side with 1 to have only one column
     let reshape_output = pooled_output2.reshape([1, weight3.shape[0]]);

@@ -35,8 +35,9 @@ impl<N, S> Tensor<N, S> {
         self.values[self.get_index(index_arr)]
     }
 
-    fn set(mut self, index_arr: [comptime Field; S], value: Field) {
+    fn set(mut self, index_arr: [comptime Field; S], value: Field) -> Self {
         self.values[self.get_index(index_arr)] = value;
+        self
     }
 
     fn quantize_add(self, x: Field, y: Field) -> Field {
@@ -79,15 +80,15 @@ impl<N, S> Tensor<N, S> {
             assert(start[i] as u32<end[i] as u32);
             assert(start[i] as u32<self.shape[i] as u32);
             assert(end[i] as u32<=self.shape[i] as u32);
-            result.shape[i] = start[i] - end[i];
+            result.shape[i] = end[i] - start[i];
         }
         let mut result_index = [0; S];
         let mut index = start;
         for k in 0..start.len() {
-            for _ in 0..(start[k] - end[k]) {
+            for _ in 0..(end[k] - start[k]) {
                 result_index[k] += 1;
                 index[k] += 1;
-                result.set(result_index, self.get(index));
+                result = result.set(result_index, self.get(index));
             }
         }
         result
