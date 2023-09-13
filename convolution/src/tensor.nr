@@ -35,9 +35,9 @@ impl<N, S> Tensor<N, S> {
         self.values[self.get_index(index_arr)]
     }
 
-    fn set(mut self, index_arr: [comptime Field; S], value: Field) -> Self {
+        fn set(mut self, index_arr: [comptime Field; S], value: Field) -> [Field; N] {
         self.values[self.get_index(index_arr)] = value;
-        self
+        self.values
     }
 
     fn quantize_add(self, x: Field, y: Field) -> Field {
@@ -75,22 +75,21 @@ impl<N, S> Tensor<N, S> {
     }
 
     fn slice<M>(self, start: [comptime Field; S], end: [comptime Field; S]) -> Tensor<M, S> {
-        let mut result =  Tensor {values: [0; M], shape: start, zero_point: self.zero_point, scale: self.scale};
+        let mut values = [0; M];
+        let mut shape = [0; S];
+        let mut result_len = 1;
         for i in 0..self.shape.len() {
             assert(start[i] as u32<end[i] as u32);
             assert(start[i] as u32<self.shape[i] as u32);
             assert(end[i] as u32<=self.shape[i] as u32);
-            result.shape[i] = end[i] - start[i];
+            shape[i] = end[i] - start[i];
+            result_len*=(end[i] - start[i]);
         }
-        let mut result_index = [0; S];
-        let mut index = start;
-        for k in 0..start.len() {
-            for _ in 0..(end[k] - start[k]) {
-                result_index[k] += 1;
-                index[k] += 1;
-                result = result.set(result_index, self.get(index));
-            }
+        let mut values_slice = slice(self.values, self.shape, start, end, 0);
+        for i in 0..result_len{
+            values[i] = values_slice[i];
         }
+        let mut result =  Tensor {values: values, shape: shape, zero_point: self.zero_point, scale: self.scale};
         result
     }
 
@@ -338,6 +337,38 @@ fn quantize_div(x: Field, x_z: Field, x_s: Field, y: Field, y_z: Field, y_s: Fie
     let mut z: Field = (((quantize::div(x, x_z, x_s, y, y_z, y_s, z_z, z_s) * x_s) as u126/(x_s) as u126) as Field);
     z
 } 
+
+fn slice<N, M, P>(tensor: [Field; N], shape: [comptime Field; M], start: [comptime Field; M], end: [comptime Field; M], dim: comptime Field) -> [Field; N] {
+    let mut result = [0; N];
+    if (shape.len() == dim+1) {
+        for i in 0..(end[dim]-start[dim]) {
+            result[i] = tensor[start[0]+i];
+        }
+        result
+    }
+    else {
+        let mut d = 1;
+        for j in (dim+1)..shape.len(){
+            d *= shape[j];
+        }
+        let mut sub_result_len: comptime Field = end[dim+1]-start[dim+1];
+        for n in (dim+2)..shape.len() {
+            sub_result_len *= end[n]-start[n];
+        }
+        for i in start[dim]..end[dim]{
+            let mut sub_tensor = [0; N];
+            let mut index = i*d;
+            for n in 0..d {
+                sub_tensor[n] = tensor[index+n];
+            }
+            let sub_result = slice(sub_tensor, shape, start, end, dim+1);
+            for n in 0..sub_result_len {
+                result[(i-start[dim])*sub_result_len+n] = sub_result[n];
+            }
+        }
+        result
+    }
+}
 
 fn add<M>(tensor1: [Field; M], tensor2: [Field; M]) -> [Field; M]{
     let mut result = [0; M];

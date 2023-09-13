@@ -14,11 +14,11 @@ global scale = 10000;
 fn main(inputs: [Field; in_len], w1 : [Field; w1_len], b1 : [Field; b1_len], w2 : [Field; w2_len], b2 : [Field; b2_len], w3 : [Field; w3_len], b3 : [Field; b3_len]) {
 
     let weight1 = Tensor::new_quantized(w1, [5, 1, 3, 3], zero_point, scale);
-    let bias1 = Tensor::new_quantized(b1, [5], zero_point, scale);
+    let bias1 = Tensor::new_quantized(b1, [1, 5], zero_point, scale);
     let weight2 = Tensor::new_quantized(w2, [10, 1, 3, 3], zero_point, scale);
-    let bias2 = Tensor::new_quantized(b2, [10], zero_point, scale);
+    let bias2 = Tensor::new_quantized(b2, [1, 10], zero_point, scale);
     let weight3 = Tensor::new_quantized(w3, [49, 10], zero_point, scale);
-    let bias3 = Tensor::new_quantized(b3, [10], zero_point, scale);
+    let bias3 = Tensor::new_quantized(b3, [1, 10], zero_point, scale);
 
     // Create a convolutional layer
     let conv_layer1 = Conv2D::new(weight1, bias1, 1, 1);

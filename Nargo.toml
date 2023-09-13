@@ -2,4 +2,6 @@
 members = [
     "convolution",
     "examples/cnn",
+    "test/tensor_slice",
+    "test/linear",
 ]
